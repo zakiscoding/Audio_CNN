@@ -25,7 +25,8 @@ const FeatureMap = ({
       <svg
         viewBox={`0 0 ${mapWidth} ${mapHeight}`}
         preserveAspectRatio="none"
-        className={`mx-auto block rounded border border-stone-200 ${internal ? "w-full max-w-32" : spectrogram ? "w-full object-contain" : "max-h-[300px] w-full max-w-[500px] object-contain"}`}
+        className={`mx-auto block rounded ${internal ? "w-full max-w-32" : spectrogram ? "w-full object-contain" : "max-h-75 w-full max-w-125 object-contain"}`}
+        style={{ border: "1px solid #1e2d3d" }}
       >
         {data.flatMap((row, i) =>
           row.map((value, j) => {
@@ -44,7 +45,7 @@ const FeatureMap = ({
           }),
         )}
       </svg>
-      <p className="mt-1 text-xs text-stone-500">{title}</p>
+      <p className="mt-1 text-xs text-slate-600">{title}</p>
     </div>
   );
 };

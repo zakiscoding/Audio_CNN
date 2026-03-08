@@ -1,0 +1,124 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+/* Improved global styles for Audio-CNN — non-invasive, prefixed utilities */
+:root{
+  --ac-bg-0: #071028; /* deep background */
+  --ac-bg-1: linear-gradient(180deg,#071028 0%, #061028 60%);
+  --ac-surface: rgba(255,255,255,0.03);
+  --ac-card: rgba(255,255,255,0.025);
+  --ac-accent: #7c3aed; /* purple */
+  --ac-accent-2: #4f46e5;
+  --ac-muted: #9aa4bf;
+  --ac-radius: 12px;
+  --ac-maxw: 1100px;
+  --ac-gap: 20px;
+  --ac-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  --ac-glow: 0 8px 30px rgba(124,58,237,0.12);
+  --ac-text: #e6eef8;
+  --ac-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Segoe UI Mono', 'Noto Mono', monospace;
+  --ac-ui: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+
+/* Base reset and typography */
+*{box-sizing:border-box}
+html,body,#root,#__next{height:100%}
+body{
+  margin:0;
+  background: var(--ac-bg-1);
+  color:var(--ac-text);
+  font-family:var(--ac-ui);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.45;
+  padding:28px 20px;
+}
+
+a{color:var(--ac-accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Layout container — opt-in : add class "ac-layout" to root container */
+.ac-layout{
+  max-width:var(--ac-maxw);
+  margin:0 auto;
+  display:grid;
+  grid-template-columns: 1fr 380px;
+  gap:var(--ac-gap);
+  align-items:start;
+}
+@media (max-width:980px){
+  .ac-layout{grid-template-columns:1fr;padding:0 12px}
+}
+
+/* Header */
+.ac-header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.ac-brand{display:flex;gap:12px;align-items:center}
+.ac-logo{
+  width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:700;color:white;
+  background:linear-gradient(135deg,var(--ac-accent),var(--ac-accent-2));box-shadow:var(--ac-glow)
+}
+.ac-title{font-size:18px;font-weight:700}
+.ac-sub{color:var(--ac-muted);font-size:13px}
+
+/* Card surface (use .ac-card) */
+.ac-card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:var(--ac-radius);
+  padding:18px;
+  box-shadow:var(--ac-shadow);
+  border:1px solid var(--ac-surface);
+}
+
+/* Primary hero section */
+.ac-hero h1{margin:0 0 8px 0;font-size:28px}
+.ac-hero p{margin:0 0 14px 0;color:var(--ac-muted)}
+
+/* Upload area */
+.ac-upload{
+  display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:1px dashed rgba(255,255,255,0.04);
+  background: linear-gradient(90deg, rgba(124,58,237,0.02), rgba(79,70,229,0.01));
+}
+.ac-filebtn{
+  background:linear-gradient(90deg,var(--ac-accent),var(--ac-accent-2));
+  border:none;color:white;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer;box-shadow:var(--ac-glow);
+}
+.ac-fileinfo{color:var(--ac-muted);font-size:13px}
+
+/* Waveform placeholder */
+.ac-wave{
+  margin-top:14px;height:120px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ac-muted);
+  border:1px solid rgba(255,255,255,0.02);
+  background:linear-gradient(90deg, rgba(124,58,237,0.04), rgba(79,70,229,0.01));
+}
+
+/* Right panel */
+.ac-panel{display:flex;flex-direction:column;gap:14px;padding:6px}
+.ac-item{background:transparent;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);}
+
+/* Buttons & UI */
+.ac-btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--ac-text);cursor:pointer;font-weight:600}
+.ac-btn.primary{background:linear-gradient(90deg,var(--ac-accent),var(--ac-accent-2));color:white;border:none;box-shadow:var(--ac-glow)}
+.ac-btn.ghost{background:transparent;border:1px dashed rgba(255,255,255,0.04)}
+
+/* Small text */
+.ac-small{font-size:13px;color:var(--ac-muted)}
+
+/* Utility helpers */
+.ac-row{display:flex;gap:10px;align-items:center}
+.ac-stack{display:flex;flex-direction:column;gap:8px}
+
+/* Accessible focus ring */
+:focus{outline:none}
+.ac-focus:focus{box-shadow:0 0 0 4px rgba(124,58,237,0.12);border-radius:8px}
+
+/* Footer */
+.ac-footer{grid-column:1/-1;text-align:center;color:var(--ac-muted);font-size:13px;margin-top:8px}
+
+/* Minimal table/list styles for predictions */
+.ac-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.ac-list li{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02)}
+
+/* Keep file-level selectors non-aggressive to avoid breaking existing components */
+/* Use the prefixed classes in your pages/components to adopt the new theme */
+
+/* End of audio-cnn theme */

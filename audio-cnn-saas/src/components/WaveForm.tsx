@@ -33,24 +33,26 @@ const Waveform = ({ data, title }: { data: number[]; title: string }) => {
         <svg
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="xMidYMid meet"
-          className="block max-h-75 max-w-full rounded border border-stone-200"
+          className="block max-h-75 max-w-full rounded"
+          style={{ border: "1px solid #1e2d3d", background: "#060911" }}
         >
           <path
             d={`M 0 ${centerY} H ${width}`}
-            stroke="#e7e5e4"
+            stroke="#1e2d3d"
             strokeWidth="1"
           />
           <path
             d={pathData}
             fill="none"
-            stroke="#44403c"
+            stroke="#22d3ee"
             strokeWidth="1.5"
             strokeLinejoin="round"
             strokeLinecap="round"
+            style={{ filter: "drop-shadow(0 0 3px rgba(34,211,238,0.4))" }}
           />
         </svg>
       </div>
-      <p className="mt-2 text-center text-xs text-stone-500">{title}</p>
+      <p className="mt-2 text-center text-xs text-slate-600">{title}</p>
     </div>
   );
 };
