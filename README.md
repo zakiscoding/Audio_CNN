@@ -1,4 +1,7 @@
 # CNN Audio Visualizer (ESC-50)
+<img width="2112" height="2166" alt="Screenshot 2026-03-07 at 6 10 03 PM" src="https://github.com/user-attachments/assets/76349198-83f7-4849-b8e3-c68d6f19f9f8" />
+
+<img width="1716" height="2110" alt="Screenshot 2026-03-06 at 9 19 55 PM" src="https://github.com/user-attachments/assets/30099fa2-d1ce-42a7-8a5c-021408bfc01e" />
 
 What I built
 - I created a compact end-to-end project that trains a convolutional neural network on the ESC-50 environmental sound dataset and exposes an interactive web UI where you can upload a WAV file and instantly see:
