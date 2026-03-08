@@ -5,7 +5,7 @@ import { Geist } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "CNN Audio Visualizer",
-  description: "Classify sounds and explore CNN feature maps",
+  description: "Classify sound and explore CNN feature maps",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
