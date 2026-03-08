@@ -292,7 +292,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "app = modal.App(\"audio-cnn-inference\")\nimage = (modal.Image.debian_slim()\n            .pip_install_from_requirements(\"requirements.txt\")\n            .apt_install([\"libsndfile1\"])\n            .add_local_python_source(\"model\"))\nmodel_volume = modal.Volume.from_name(\"esc-model\")\nclass AudioProcessor:\n    def __init__(self):\n        self.transform = nn.Sequential(\n            T.MelSpectrogram(",
+        "peekOfCode": "app = modal.App(\"audio-cnn-inference\")\nimage = (modal.Image.debian_slim()\n            .pip_install_from_requirements(\"requirements.txt\")\n            .apt_install([\"libsndfile1\", \"ffmpeg\"])\n            .add_local_python_source(\"model\"))\nmodel_volume = modal.Volume.from_name(\"esc-model\")\nclass AudioProcessor:\n    def __init__(self):\n        self.transform = nn.Sequential(\n            T.MelSpectrogram(",
         "detail": "main",
         "documentation": {}
     },
@@ -301,7 +301,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "image = (modal.Image.debian_slim()\n            .pip_install_from_requirements(\"requirements.txt\")\n            .apt_install([\"libsndfile1\"])\n            .add_local_python_source(\"model\"))\nmodel_volume = modal.Volume.from_name(\"esc-model\")\nclass AudioProcessor:\n    def __init__(self):\n        self.transform = nn.Sequential(\n            T.MelSpectrogram(\n                sample_rate=44100, ",
+        "peekOfCode": "image = (modal.Image.debian_slim()\n            .pip_install_from_requirements(\"requirements.txt\")\n            .apt_install([\"libsndfile1\", \"ffmpeg\"])\n            .add_local_python_source(\"model\"))\nmodel_volume = modal.Volume.from_name(\"esc-model\")\nclass AudioProcessor:\n    def __init__(self):\n        self.transform = nn.Sequential(\n            T.MelSpectrogram(\n                sample_rate=44100, ",
         "detail": "main",
         "documentation": {}
     },

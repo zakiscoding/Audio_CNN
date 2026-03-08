@@ -91,22 +91,31 @@ const getEmojiForClass = (className: string): string => {
 };
 
 function splitLayers(visualization: VisualizationData) {
-  const main: [string, LayerData][] = [];
+  const mainMap = new Map<string, LayerData>();
   const internals: Record<string, [string, LayerData][]> = {};
 
   for (const [name, data] of Object.entries(visualization)) {
     if (!name.includes(".")) {
-      main.push([name, data]);
+      mainMap.set(name, data);
     } else {
       const [parent] = name.split(".");
       if (parent === undefined) continue;
       if (!internals[parent]) internals[parent] = [];
       internals[parent].push([name, data]);
+      if (!mainMap.has(parent)) mainMap.set(parent, data);
     }
   }
 
-  return { main, internals };
+  return { main: Array.from(mainMap.entries()), internals };
 }
+
+const ESC50_CATEGORIES: Record<string, string[]> = {
+  "Animals": ["dog", "rooster", "pig", "cow", "frog", "cat", "hen", "insects", "sheep", "crow"],
+  "Nature": ["rain", "sea_waves", "crackling_fire", "chirping_birds", "water_drops", "wind", "pouring_water", "thunderstorm", "crickets", "footsteps"],
+  "Human": ["crying_baby", "sneezing", "clapping", "breathing", "coughing", "laughing", "brushing_teeth", "snoring", "drinking_sipping", "toilet_flush"],
+  "Indoor": ["door_wood_knock", "mouse_click", "keyboard_typing", "door_wood_creaks", "can_opening", "washing_machine", "vacuum_cleaner", "clock_alarm", "clock_tick", "glass_breaking"],
+  "Mechanical": ["helicopter", "chainsaw", "siren", "car_horn", "engine", "train", "church_bells", "airplane", "fireworks", "hand_saw"],
+};
 
 export default function HomePage() {
   const [vizData, setVizData] = useState<ApiResponse | null>(null);
@@ -114,13 +123,34 @@ export default function HomePage() {
   const [fileName, setFileName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [showClasses, setShowClasses] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const getAudioDuration = (file: File): Promise<number> =>
+    new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const audio = new Audio();
+      audio.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(audio.duration); };
+      audio.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Could not read audio duration")); };
+      audio.src = url;
+    });
+
   const processFile = async (file: File) => {
-    setFileName(file.name);
-    setIsLoading(true);
     setError(null);
     setVizData(null);
+
+    try {
+      const duration = await getAudioDuration(file);
+      if (duration > 5) {
+        setError(`File is ${duration.toFixed(1)}s — maximum allowed is 5 seconds.`);
+        return;
+      }
+    } catch {
+      // If duration can't be read, let the server handle it
+    }
+
+    setFileName(file.name);
+    setIsLoading(true);
 
     const reader = new FileReader();
     reader.readAsArrayBuffer(file);
@@ -161,6 +191,15 @@ export default function HomePage() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) await processFile(file);
+    // Reset so the same file can be re-selected
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const resetAndUpload = () => {
+    setError(null);
+    setVizData(null);
+    setFileName("");
+    fileInputRef.current?.click();
   };
 
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
@@ -201,8 +240,28 @@ export default function HomePage() {
             CNN Audio Visualizer
           </h1>
           <p className="text-slate-500">
-            Upload a WAV file to classify sounds and explore neural network feature maps
+            Upload an audio file to classify sounds and explore neural network feature maps
           </p>
+        </div>
+
+        {/* How to use */}
+        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-4">
+          {[
+            { step: "01", title: "Find a sound", desc: "Record or find a short clip of one of the 50 supported environmental sounds" },
+            { step: "02", title: "Keep it short", desc: "Trim your clip to 5 seconds or under — the model was trained on short clips" },
+            { step: "03", title: "Upload", desc: "Drop the file onto the upload zone or click Choose File. WAV, MP3, FLAC and more are accepted" },
+            { step: "04", title: "Explore results", desc: "See the top predictions and scroll down to explore the CNN feature maps" },
+          ].map(({ step, title, desc }) => (
+            <div
+              key={step}
+              className="rounded-xl p-4"
+              style={{ background: "#060f24", border: "1px solid #0f2545" }}
+            >
+              <p className="mb-1 font-mono text-xs font-bold" style={{ color: "#facc15" }}>{step}</p>
+              <p className="mb-1 text-sm font-semibold text-white">{title}</p>
+              <p className="text-xs leading-relaxed" style={{ color: "rgba(186,210,255,0.45)" }}>{desc}</p>
+            </div>
+          ))}
         </div>
 
         {/* Upload Zone */}
@@ -219,7 +278,7 @@ export default function HomePage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".wav"
+            accept="audio/*"
             onChange={handleFileChange}
             disabled={isLoading}
             className="hidden"
@@ -248,9 +307,33 @@ export default function HomePage() {
           ) : (
             <>
               <p className="mb-1 font-medium text-slate-300">
-                {fileName ? fileName : "Drop your WAV file here"}
+                {fileName ? fileName : "Drop any audio file here"}
               </p>
-              <p className="mb-6 text-sm text-slate-600">or click to browse</p>
+              <p className="mb-4 text-sm text-slate-600">or click to browse</p>
+
+              <div className="mb-5 flex flex-wrap justify-center gap-1.5">
+                {["WAV", "MP3", "FLAC", "OGG", "M4A", "AAC", "OPUS", "AIFF"].map((fmt) => (
+                  <span
+                    key={fmt}
+                    className="rounded px-1.5 py-0.5 font-mono text-xs"
+                    style={{
+                      background: "rgba(0,212,255,0.06)",
+                      border: "1px solid rgba(0,212,255,0.15)",
+                      color: "rgba(186,210,255,0.5)",
+                    }}
+                  >
+                    {fmt}
+                  </span>
+                ))}
+              </div>
+
+              <p
+                className="mb-5 flex items-center justify-center gap-1.5 text-xs"
+                style={{ color: "rgba(251,191,36,0.7)" }}
+              >
+                <span>⚠</span>
+                Keep files 5 seconds or under for best results
+              </p>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="rounded-lg px-5 py-2 text-sm font-medium text-cyan-400 transition-colors hover:text-cyan-300"
@@ -265,19 +348,84 @@ export default function HomePage() {
           )}
         </div>
 
+        {/* Supported Classes */}
+        <div className="mb-6">
+          <button
+            onClick={() => setShowClasses((v) => !v)}
+            className="flex w-full items-center justify-between rounded-xl px-5 py-3 text-sm transition-colors"
+            style={{ background: "#060f24", border: "1px solid #0f2545" }}
+          >
+            <span className="flex items-center gap-2" style={{ color: "rgba(186,210,255,0.6)" }}>
+              <span style={{ color: "#facc15" }}>◈</span>
+              50 supported sound classes
+            </span>
+            <span style={{ color: "rgba(186,210,255,0.35)", fontSize: "0.7rem" }}>
+              {showClasses ? "▲ hide" : "▼ show"}
+            </span>
+          </button>
+
+          {showClasses && (
+            <div
+              className="mt-2 rounded-xl p-5"
+              style={{ background: "#060f24", border: "1px solid #0f2545" }}
+            >
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+                {Object.entries(ESC50_CATEGORIES).map(([category, classes]) => (
+                  <div key={category}>
+                    <p
+                      className="mb-3 text-xs font-bold uppercase tracking-[0.18em]"
+                      style={{ color: "#facc15" }}
+                    >
+                      {category}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {classes.map((cls) => (
+                        <li
+                          key={cls}
+                          className="flex items-center gap-2 text-xs"
+                          style={{ color: "rgba(186,210,255,0.55)" }}
+                        >
+                          <span>{getEmojiForClass(cls)}</span>
+                          <span>{cls.replaceAll("_", " ")}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Error */}
         {error && (
           <div
-            className="mb-8 rounded-xl px-5 py-4 text-sm text-red-400"
+            className="mb-8 flex items-center justify-between gap-4 rounded-xl px-5 py-4 text-sm text-red-400"
             style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.2)" }}
           >
-            {error}
+            <span>{error}</span>
+            <button
+              onClick={resetAndUpload}
+              className="shrink-0 rounded-lg px-4 py-1.5 text-xs font-medium transition-colors hover:text-red-300"
+              style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.3)" }}
+            >
+              Try Another File
+            </button>
           </div>
         )}
 
         {/* Results */}
         {vizData && (
           <div className="space-y-6">
+            <div className="flex justify-end">
+              <button
+                onClick={resetAndUpload}
+                className="rounded-lg px-5 py-2 text-sm font-medium text-cyan-400 transition-colors hover:text-cyan-300"
+                style={{ background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.25)" }}
+              >
+                Analyse Another File
+              </button>
+            </div>
 
             {/* Predictions */}
             <Card>
@@ -390,7 +538,7 @@ export default function HomePage() {
                                 <FeatureMap
                                   key={layerName}
                                   data={layerData.values}
-                                  title={layerName.replace(`${mainName}.`, "")}
+                                  title={`Block ${layerName.replace(`${mainName}.`, "")}`}
                                   internal={true}
                                 />
                               ))}

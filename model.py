@@ -30,9 +30,9 @@ class ResidualBlock(nn.Module):
         out = self.conv2(out)
         out = self.bn2(out)
         
-        shortcut = self.shortcut(x) if self.use_shortcut else x   
-             
-        out_add += out + shortcut
+        shortcut = self.shortcut(x) if self.use_shortcut else x
+
+        out_add = out + shortcut
         out = torch.relu(out_add)
         
         return out
@@ -64,18 +64,33 @@ class AudioCNN(nn.Module):
         self.dropout= nn.Dropout(0.5)
         self.fc = nn.Linear(512, num_classes)
         
-    def forward(self, x):
+    def forward(self, x, return_feature_maps=False):
+        feature_maps = {}
+
         x = self.conv1(x)
-        for block in self.layer1:
+        feature_maps['conv1'] = x
+
+        for i, block in enumerate(self.layer1):
             x = block(x)
-        for block in self.layer2:
+            feature_maps[f'layer1.{i}'] = x
+
+        for i, block in enumerate(self.layer2):
             x = block(x)
-        for block in self.layer3:
+            feature_maps[f'layer2.{i}'] = x
+
+        for i, block in enumerate(self.layer3):
             x = block(x)
-        for block in self.layer4:
+            feature_maps[f'layer3.{i}'] = x
+
+        for i, block in enumerate(self.layer4):
             x = block(x)
+            feature_maps[f'layer4.{i}'] = x
+
         x = self.avgpool(x)
-        x = x.view(x.size(0),-1)
+        x = x.view(x.size(0), -1)
         x = self.dropout(x)
         x = self.fc(x)
-        return 
+
+        if return_feature_maps:
+            return x, feature_maps
+        return x

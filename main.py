@@ -15,7 +15,7 @@ app = modal.App("audio-cnn-inference")
 
 image = (modal.Image.debian_slim()
             .pip_install_from_requirements("requirements.txt")
-            .apt_install(["libsndfile1"])
+            .apt_install(["libsndfile1", "ffmpeg"])
             .add_local_python_source("model"))
 
 model_volume = modal.Volume.from_name("esc-model")
@@ -62,18 +62,14 @@ class AudioClassifier:
     
     @modal.fastapi_endpoint(method="POST")
     def inference(self, request: InferenceRequest):
-        audio_bytes =  base64.b64decode(request.audio_data)
-        
-        audio_data, sample_rate = sf.read(
-            io.BytesIO(audio_bytes), dtype='float32')
-        
-        if audio_data.ndim > 1:
-            # mean across channels -> mono signal with same length as samples
-            audio_data = np.mean(audio_data, axis=1)
-        
-        if sample_rate!=44100:
+        audio_bytes = base64.b64decode(request.audio_data)
+
+        audio_data, sample_rate = librosa.load(
+            io.BytesIO(audio_bytes), sr=None, mono=True, dtype=np.float32)
+
+        if sample_rate != 44100:
             audio_data = librosa.resample(
-                y=audio_data, orig_sr=sample_rate,target_sr=44100)
+                y=audio_data, orig_sr=sample_rate, target_sr=44100)
             sample_rate = 44100
         
         spectogram = self.audio_processor.process_audio_chunk(audio_data)
