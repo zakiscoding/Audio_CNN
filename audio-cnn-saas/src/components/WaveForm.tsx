@@ -33,7 +33,7 @@ const Waveform = ({ data, title }: { data: number[]; title: string }) => {
         <svg
           viewBox={`0 0 ${width} ${height}`}
           preserveAspectRatio="xMidYMid meet"
-          className="block max-h-[300px] max-w-full rounded border border-stone-200"
+          className="block max-h-75 max-w-full rounded border border-stone-200"
         >
           <path
             d={`M 0 ${centerY} H ${width}`}

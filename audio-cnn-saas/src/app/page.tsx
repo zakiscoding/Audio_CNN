@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import ColorScale from "../components/ColorScale";
 import FeatureMap from "../components/FeatureMap";
@@ -176,7 +175,7 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-stone-50 p-8">
-      <div className="mx-auto max-w-[100%]">
+      <div className="mx-auto max-w-full">
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-4xl font-light tracking-tight text-stone-900">
             CNN Audio Visualizer
